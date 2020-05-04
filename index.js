@@ -18,13 +18,12 @@ var { MemoryRepository } = require('./titopia/repositories');
 var repository = new MemoryRepository();
 var bot = new TitopiaBot(repository, i18n);
 
-const token = "821334919:AAFf4q2m9hOGMXLtjsOZJK0eI7thDeClcww ";// process.env.TELEGRAM_TOKEN;
+const token = process.env.TELEGRAM_TOKEN;
 
 if(token) {
     console.log("Start mode telegram.");
     const apiClient = new TelegramBotApiClient(token);
     bot.onSendMessage(async (chatId, message) => {
-        console.log(message);
         try {
             await apiClient.sendMessage(chatId, message);
         } catch (e) {
