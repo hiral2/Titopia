@@ -62,6 +62,8 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.post('/new-message', async function(req,res) {
+    console.log(JSON.stringify(req.body||{}));
+    
     const handled = await bot.handle(req, res);
     if(!handled){
         res.end();
