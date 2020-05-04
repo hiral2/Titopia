@@ -2,6 +2,8 @@ const axios = require('axios')
 
 const defaultUrl = 'https://api.telegram.org';
 
+const muteChatPermissions = { 'can_send_messages': false, 'can_send_media_messages': false, 'can_send_polls': false };
+
 class TelegramBotApiClient {
     constructor(token, apiUrl = defaultUrl){
         this.token = token;
@@ -15,7 +17,7 @@ class TelegramBotApiClient {
         })
     }
 
-    restrictChatMember(chatId, userId, time, permissions = ['can_send_messages', 'can_send_media_messages', 'can_send_polls']) {
+    restrictChatMember(chatId, userId, time, permissions = muteChatPermissions) {
         return axios.post(`${this.apiUrl}/bot${this.token}/restrictChatMember`,{
             chat_id: chatId,
             user_id: userId,
