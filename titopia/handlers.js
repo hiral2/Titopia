@@ -57,13 +57,11 @@ const takeOutHandler = async ({
         return {message: __("user_required_to_voting") };
     }
 
-    const user_infos = users.map(u=>{
-        return {
+    const user_infos = users.map(u=>({
             id: u.id,
             first_name: u.first_name,
             last_name: u.last_name
-        };
-    })
+        }))
 
     const takeOut = await chatRecord.startNewTakeOut(user_infos, from);
     const config = chatRecord.getConfig();
@@ -93,8 +91,7 @@ const takeOutHandler = async ({
         }
     }
 }
-const buildVoteHandler = (vote) => {
-    return async ({
+const buildVoteHandler = (vote) => async ({
         __, 
         chatRecord, 
         from
@@ -131,7 +128,6 @@ const buildVoteHandler = (vote) => {
             };
         }
     }
-}
 
 const cancelHandler = async ({
     __, 

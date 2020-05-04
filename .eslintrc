@@ -1,4 +1,5 @@
 {
+    "parser": "babel-eslint",
     "parserOptions": {
         "ecmaVersion": 6,
         "sourceType": "module",
@@ -7,13 +8,12 @@
         }
     },
     "rules": {
-        "import/prefer-default-export": "warn",
-        "import/named": "warn",
         "no-useless-escape": "warn",
         "camelcase": "warn",
         "prefer-promise-reject-errors": "warn",
         "func-names": "off",
         "class-methods-use-this": "off",
-        "prefer-object-spread": "warn"
-      }
+        "prefer-object-spread": "warn",
+        "arrow-body-style": "off"
+      },
 }
