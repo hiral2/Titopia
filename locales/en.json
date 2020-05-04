@@ -8,5 +8,10 @@
 	"voting_status_body_votes_{{votes}}_{{maxVoteToTakeOut}}_totals_{{totals}}_{{maxVoteToFinish}}": "Votes: {{votes}} of {{maxVoteToTakeOut}}\nTotals: {{totals}} of {{maxVoteToFinish}}",
 	"you_cannot_cancel_the_current_vote": "You cannot cancel the current vote",
 	"vote_canceled": "Vote canceled.",
-	"users_{{users}}_muted_by_{{days}}": "Users **{{users}}** muted by {{days}} days"
+	"users_{{users}}_muted_by_{{days}}": "Users **{{users}}** muted by {{days}} days",
+	"started": "**Titopia** is started!",
+	"stopped": "**Titopia** is stopped",
+	"lang_required %s": "Lang is required, please use one of this lang: %s",
+	"lang_not_found": "Lang not found",
+	"lang_changed": "Lang changed"
 }

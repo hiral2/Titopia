@@ -13,6 +13,7 @@ class MemoryRepository {
     constructor(){
         this.chats = {};
         this.defaultChatConfig = {
+            enabled: false,
             maxVoteToTakeOut:5,
             maxVoteToFinish: 10,
             bannedDays: 2,
@@ -20,7 +21,8 @@ class MemoryRepository {
             votePatterns: [0x270B].map(e=> fixedFromCharCode(e)),
             unvotePatterns: [0x1F44E].map(e=> fixedFromCharCode(e)),
             takeOutRegex: /\/out/,
-            cancelRegex: /\/cancel/
+            cancelRegex: /\/cancel/,
+            lang: 'en'
         }
     }
 
@@ -52,6 +54,26 @@ class MemoryChatRecord {
 
     getConfig(){
         return this.chat.config;
+    }
+
+    isEnabled(){
+        return this.chat.enabled;
+    }
+
+    start(){
+        this.chat.enabled = true;
+    }
+
+    stop(){
+        this.chat.enabled = false;
+    }
+
+    setLang(lang) {
+        this.chat.config.lang = lang;
+    }
+
+    getLang(){
+        return this.getConfig().lang;
     }
 
     clearCurrentTakeOut(until) {

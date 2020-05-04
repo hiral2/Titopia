@@ -1,6 +1,54 @@
 var moment = require('moment');
 
-const getStatusMessage = async (__,chatRecord) => {
+const startHandler = async({ 
+    i18n,
+    chatRecord
+}) => {
+    chatRecord.start();
+    return {
+        message: i18n.__('started')
+    }
+}
+
+const stopHandler = async({ 
+    i18n,
+    chatRecord
+}) => {
+    chatRecord.stop();
+    return {
+        message: i18n.__('stopped')
+    }
+}
+
+const setLangHandler = async({ 
+    i18n,
+    text,
+    chatRecord
+}) => {
+    
+    const lang = (text.split(' ')[1] || '').trim();
+
+    if(!lang){
+        return {
+            message: i18n.__('lang_required %s', i18n.getLocales().join(', '))
+        }
+    }
+
+    if(!i18n.getLocales().some(l => l==lang)){
+        return {
+            message: i18n.__('lang_not_found')
+        }
+    }
+
+    chatRecord.setLang(lang);
+    i18n.setLocale(lang);
+
+    return {
+        message: i18n.__('lang_changed')
+    }
+}
+
+const getStatusMessage = async (i18n,chatRecord) => {
     const takeOut = await chatRecord.getCurrentTakeOut();
     const config = chatRecord.getConfig();
 
@@ -8,8 +56,8 @@ const getStatusMessage = async (__,chatRecord) => {
     const takeOutVotes = values.filter(v=>v);
     const userNames = takeOut.users.map(u=>u.first_name).join(', ');
 
-    const voteStatusTitle = __('voting_status_title_users_%s', userNames);
-    const voteStatusBody = __('voting_status_body_votes_{{votes}}_{{maxVoteToTakeOut}}_totals_{{totals}}_{{maxVoteToFinish}}', {
+    const voteStatusTitle = i18n.__('voting_status_title_users_%s', userNames);
+    const voteStatusBody = i18n.__('voting_status_body_votes_{{votes}}_{{maxVoteToTakeOut}}_totals_{{totals}}_{{maxVoteToFinish}}', {
         votes: takeOutVotes.length,
         maxVoteToTakeOut: config.maxVoteToTakeOut,
         totals: values.length,
@@ -22,22 +70,22 @@ const getStatusMessage = async (__,chatRecord) => {
 
 const statusHandler = async ({
         chatRecord,
-        __
+        i18n
 }) => {
     const takeOut = await chatRecord.getCurrentTakeOut();
 
     if(!takeOut){
         return {
-            message: __("voting_not_started")
+            message: i18n.__("voting_not_started")
         }
     }
 
-    return await getStatusMessage(__, chatRecord);
+    return await getStatusMessage(i18n, chatRecord);
 }
 
 const takeOutHandler = async ({
     body,
-    __, 
+    i18n, 
     chatRecord, 
     from
 }) => {
@@ -54,7 +102,7 @@ const takeOutHandler = async ({
     const users = entities.map(a=>a.user).filter(a=>a);
 
     if(!users.length){
-        return {message: __("user_required_to_voting") };
+        return {message: i18n.__("user_required_to_voting") };
     }
 
     const user_infos = users.map(u=>({
@@ -75,7 +123,7 @@ const takeOutHandler = async ({
     if(takeOut.isStarted){
         const userNames = user_infos.map(u=>u.first_name).join(', ');
         return {
-            message: __('vote_started_from_{{fromName}}_to_{{users}}_votes_{{votes}}_vote_using_{{votePattern}}_unvote_using_{{unvotePattern}}_totals_{{totals}}_cancel_using_{{cancelPattern}}', { 
+            message: i18n.__('vote_started_from_{{fromName}}_to_{{users}}_votes_{{votes}}_vote_using_{{votePattern}}_unvote_using_{{unvotePattern}}_totals_{{totals}}_cancel_using_{{cancelPattern}}', { 
                 users:userNames, 
                 fromName: ((from.first_name || '') + ' ' + (from.last_name || '')).trim(),
                 cancelPattern: cancelPattern,
@@ -87,12 +135,12 @@ const takeOutHandler = async ({
         };
     }else{
         return {
-            message: __('voting_alredy_exists')
+            message: i18n.__('voting_alredy_exists')
         }
     }
 }
 const buildVoteHandler = (vote) => async ({
-        __, 
+        i18n, 
         chatRecord, 
         from
     }) => {
@@ -105,7 +153,7 @@ const buildVoteHandler = (vote) => async ({
         const config = chatRecord.getConfig();
         if(!voteResult.finished){
             if (voteResult.changed && config.showStatusEveryVote) {
-                return getStatusMessage(__, chatRecord);
+                return getStatusMessage(i18n, chatRecord);
             }else{
                 return false;
             }
@@ -118,19 +166,19 @@ const buildVoteHandler = (vote) => async ({
             return {
                 ...voteResult,
                 untilTime,
-                message: __('users_{{users}}_muted_by_{{days}}', { users:userNames, days: config.bannedDays })
+                message: i18n.__('users_{{users}}_muted_by_{{days}}', { users:userNames, days: config.bannedDays })
             };
         }else{
             await chatRecord.clearCurrentTakeOut();
             return {
                 ...voteResult,
-                message: __('voting_finished')
+                message: i18n.__('voting_finished')
             };
         }
     }
 
 const cancelHandler = async ({
-    __, 
+    i18n, 
     chatRecord, 
     from
 }) => {
@@ -142,14 +190,14 @@ const cancelHandler = async ({
 
     if(from.id!=takeOut.from.id){
         return {
-            message: __('you_cannot_cancel_the_current_vote')
+            message: i18n.__('you_cannot_cancel_the_current_vote')
         }
 
     }else{
         await chatRecord.clearCurrentTakeOut();
 
         return {
-            message: __('vote_canceled')
+            message: i18n.__('vote_canceled')
         }
     }
 }
@@ -158,5 +206,8 @@ module.exports = {
     takeOutHandler,
     buildVoteHandler,
     statusHandler,
-    cancelHandler
+    cancelHandler,
+    setLangHandler,
+    stopHandler,
+    startHandler
 };

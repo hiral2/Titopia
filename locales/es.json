@@ -1,12 +1,17 @@
 {
-    "voting_not_started": "Votacion no iniciada.",
-    "user_required_to_voting": "Se necesita almenos un usuario para votar.",
-    "voting_status_title_users_%s": "Votacion para los usuarios: %s",
-    "vote_started_to_{{fromName}}_to_{{users}}_votes_{{votes}}_vote_using_{{votePattern}}_unvote_using_{{unvotePattern}}_totals_{{totals}}_cancel_using_{{cancelPattern}}": "Votacion iniciada {{users}} !\nPara mutar solo {{votes}} votos son necesarios, con {{totals}} votos la votacion terminara.\n---------------\nPara votar a favor: {{votePattern}}\nPara votar en contra:\n{{unvotePattern}}\n{{fromName}} si quieres cancelar utiliza: {{cancelPattern}}",
-    "voting_finished": "Votacion finalizadas.",
-    "voting_alredy_exists": "Ya hay una votacion en curso.",
-    "voting_status_body_votes_{{votes}}_{{maxVoteToTakeOut}}_totals_{{totals}}_{{maxVoteToFinish}}": "Votos: {{votes}} de {{maxVoteToTakeOut}}\nTotales: {{totals}} de {{maxVoteToFinish}}",
-    "you_cannot_cancel_the_current_vote": "No puedes cancelar la votacion actual.",
-    "vote_canceled": "Votacion cancelada.",
-	"users_{{users}}_muted_by_{{days}}": "Usuarios {{users}} muteados por {{days}} dias"
+	"voting_not_started": "Votacion no iniciada.",
+	"user_required_to_voting": "Se necesita almenos un usuario para votar.",
+	"voting_status_title_users_%s": "Votacion para los usuarios: %s",
+	"vote_started_to_{{fromName}}_to_{{users}}_votes_{{votes}}_vote_using_{{votePattern}}_unvote_using_{{unvotePattern}}_totals_{{totals}}_cancel_using_{{cancelPattern}}": "Votacion iniciada {{users}} !\nPara mutar solo {{votes}} votos son necesarios, con {{totals}} votos la votacion terminara.\n---------------\nPara votar a favor: {{votePattern}}\nPara votar en contra:\n{{unvotePattern}}\n{{fromName}} si quieres cancelar utiliza: {{cancelPattern}}",
+	"voting_finished": "Votacion finalizadas.",
+	"voting_alredy_exists": "Ya hay una votacion en curso.",
+	"voting_status_body_votes_{{votes}}_{{maxVoteToTakeOut}}_totals_{{totals}}_{{maxVoteToFinish}}": "Votos: {{votes}} de {{maxVoteToTakeOut}}\nTotales: {{totals}} de {{maxVoteToFinish}}",
+	"you_cannot_cancel_the_current_vote": "No puedes cancelar la votacion actual.",
+	"vote_canceled": "Votacion cancelada.",
+	"users_{{users}}_muted_by_{{days}}": "Usuarios {{users}} muteados por {{days}} dias",
+    "started": "**Titopia** iniciada!",
+	"stopped": "**Titopia** parada!",
+	"lang_required %s": "Necesitas especificar uno de estos lenguajes %s",
+	"lang_not_found": "Lenguaje no encontrado",
+	"lang_changed": "Lenguaje cambiado"
 }
