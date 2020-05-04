@@ -26,7 +26,6 @@ if(token) {
     bot.onSendMessage(async (chatId, message)=>{
         try {
             const result = await apiClient.sendMessage(chatId, message);
-            console.log(result);
         } catch (e) {
             console.error(e);
         }
@@ -36,7 +35,6 @@ if(token) {
         const tasks = users.map(user => apiClient.restrictChatMember(chatId, user.id, untilTime));
         try {
             const results = await Promise.all(tasks);
-            console.log(results);
         } catch (e) {
             console.error(e);
         }
@@ -63,7 +61,7 @@ app.use(bodyParser.urlencoded({
 
 app.post('/new-message', async function(req,res) {
     console.log(JSON.stringify(req.body||{}));
-    
+
     const handled = await bot.handle(req, res);
     if(!handled){
         res.end();
