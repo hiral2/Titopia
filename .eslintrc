@@ -1,0 +1,19 @@
+{
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "rules": {
+        "import/prefer-default-export": "warn",
+        "import/named": "warn",
+        "no-useless-escape": "warn",
+        "camelcase": "warn",
+        "prefer-promise-reject-errors": "warn",
+        "func-names": "off",
+        "class-methods-use-this": "off",
+        "prefer-object-spread": "warn"
+      }
+}
