@@ -47,7 +47,6 @@ const takeOutHandler = async ({
         return false;
     }
 
-    console.log(entities);
     if(!entities){
         return false;    
     }
