@@ -16,7 +16,7 @@ var {TitopiaBot} = require('./titopia/titopiaBot')
 var { MemoryRepository } = require('./titopia/repositories');
 
 var repository = new MemoryRepository();
-var bot = new TitopiaBot(repository);
+var bot = new TitopiaBot(repository, i18n);
 
 const token = process.env.TELEGRAM_TOKEN;
 
@@ -25,7 +25,7 @@ if(token) {
     const apiClient = new TelegramBotApiClient(token);
     bot.onSendMessage(async (chatId, message)=>{
         try {
-            const result = await apiClient.sendMessage(chatId, message);
+            await apiClient.sendMessage(chatId, message);
         } catch (e) {
             console.error(e);
         }
@@ -34,7 +34,7 @@ if(token) {
     bot.onRestrictUsers(async (chatId, users, untilTime)=>{
         const tasks = users.map(user => apiClient.restrictChatMember(chatId, user.id, untilTime));
         try {
-            const results = await Promise.all(tasks);
+            await Promise.all(tasks);
         } catch (e) {
             console.error(e);
         }
@@ -50,22 +50,20 @@ if(token) {
     });
 }
 
-
-
-app.use(i18n.init);
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 
 app.post('/new-message', async function(req,res) {
-    console.log(JSON.stringify(req.body||{}));
+    const body = req.body;
+    console.log(JSON.stringify(body||{}));
 
-    const handled = await bot.handle(req, res);
-    if(!handled){
-        res.end();
+    if(body){
+        await bot.handle(body);
     }
+
+    res.end();
 });
 
 var PORT = process.env.PORT || 5000;

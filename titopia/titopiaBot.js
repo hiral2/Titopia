@@ -13,7 +13,8 @@ const events = {
 }
 
 class TitopiaBot {
-    constructor(repository){
+    constructor(repository, i18n){
+        this.__ = i18n.__;
         this.repository = repository;
         this.handlers = [];
         this.emitter = new EventEmitter();
@@ -55,25 +56,25 @@ class TitopiaBot {
         });
     }
 
-    async handle(req, res) {
-        const {message} = req.body;
+    async handle(body) {
+        const {message} = body;
 
         if(!message){
-            return false;
+            return;
         }
 
         const { chat, text, from } = message;
 
         if (!text){
-            return false;
+            return;
         }
 
         if (!chat){
-            return false;
+            return;
         }
 
         if (!from){
-            return false;
+            return;
         }
 
         const chatRecord = await this.repository.findChat(chat.id);
@@ -81,8 +82,7 @@ class TitopiaBot {
         const messages = [];
 
         if(handler){
-            const body = req.body;    
-            const result = await handler.handle({body, chatRecord, from, __: req.__});
+            const result = await handler.handle({body, chatRecord, from, __: this.__});
             if (result.takeOut) {
                 this.restrictUsers(chat.id, result.users, result.untilTime);
             }
@@ -96,9 +96,6 @@ class TitopiaBot {
             const msj = messages.map(m => m.message).join(',');
             this.sendSimpleMessageToChat(chat.id, msj);
         }
-        res.end();
-
-        return true;
     }
 }
 
