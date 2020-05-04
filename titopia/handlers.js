@@ -68,14 +68,11 @@ const takeOutHandler = async ({
     const takeOut = await chatRecord.startNewTakeOut(user_infos, from);
     const config = chatRecord.getConfig();
     
-    let votePattern = config.voteRegex.toString();
-    votePattern = votePattern.substring(1, votePattern.length - 2);
-    
-    let unvotePattern = config.unvoteRegex.toString();
-    unvotePattern = unvotePattern.substring(1, unvotePattern.length - 2);
+    let votePattern = config.votePatterns.join(' ');
+    let unvotePattern = config.unvotePatterns.join(' ');
 
     let cancelPattern = config.cancelRegex.toString();
-    cancelPattern = cancelPattern.substring(1, cancelPattern.length - 2);
+    cancelPattern = cancelPattern.substring(2, cancelPattern.length - 3);
 
     if(takeOut.isStarted){
         const userNames = user_infos.map(u=>u.first_name).join(', ');

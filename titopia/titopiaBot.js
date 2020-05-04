@@ -34,8 +34,8 @@ class TitopiaBot {
 
     init(){
         this.addCommand((text, chat) => chat.getConfig().takeOutRegex.test(text), takeOutHandler);
-        this.addCommand((text, chat) => chat.getConfig().voteRegex.test(text), buildVoteHandler(true));
-        this.addCommand((text, chat) => chat.getConfig().unvoteRegex.test(text), buildVoteHandler(false));
+        this.addCommand((text, chat) => chat.getConfig().votePatterns.some(p=> text.indexOf(p)>=0), buildVoteHandler(true));
+        this.addCommand((text, chat) => chat.getConfig().unvotePatterns.some(p=> text.indexOf(p)>=0), buildVoteHandler(false));
         this.addCommand((text) => this.config.statusRegex.test(text), statusHandler);
         this.addCommand((text, chat) => chat.getConfig().cancelRegex.test(text), cancelHandler);
     }

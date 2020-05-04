@@ -1,3 +1,4 @@
+var emoji = require('node-emoji');
 
 class MemoryRepository {
     constructor(){
@@ -7,8 +8,8 @@ class MemoryRepository {
             maxVoteToFinish: 10,
             bannedDays: 2,
             showStatusEveryVote: true,
-            voteRegex: /:reaised_hand:|:back_of_hand:|:reaised_back_of_hand:|:raised_hand_with_fingers_splayed:|:hand_splayed:|:raised_hand_with_part_between_middle_and_ring_fingers:|:vulcan:/,
-            unvoteRegex:  /:dislike:|:thumbdown:|:-1:|:thumbsdiwn:|:reversed_hand_with_middle_finger_extended:|:middle_finger:/,
+            votePatterns: [':raised_back_of_hand:', ':thumbsup:', ':+1:' ,':raised_hand_with_fingers_splayed:'].map(e=> emoji.get(e)),
+            unvotePatterns: [':thumbsdown:',':-1:', ':reversed_hand_with_middle_finger_extended:',':middle_finger:'].map(e=> emoji.get(e)),
             takeOutRegex: /\/out/,
             cancelRegex: /\/cancel/
         }
