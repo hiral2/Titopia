@@ -9,7 +9,7 @@ var EventEmitter = require('events');
 
 const events = {
     SEND_MESSAGE:"sendMessage",
-    RESTRICT_USERS: "RESTRICT_USERS"
+    RESTRICT_USERS: "restrictUsers"
 }
 
 class TitopiaBot {
@@ -84,10 +84,9 @@ class TitopiaBot {
             }
         }
 
-        if(messages.length) {
-            const msj = messages.map(m => m.message).join(',');
-            this.sendSimpleMessageToChat(chat.id, msj);
-        }
+        messages.forEach(msj => {
+            this.sendSimpleMessageToChat(chat.id, msj.message);
+        });
     }
 }
 

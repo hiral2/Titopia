@@ -18,11 +18,10 @@ var { MemoryRepository } = require('./titopia/repositories');
 var repository = new MemoryRepository();
 var bot = new TitopiaBot(repository, i18n);
 
-const token = process.env.TELEGRAM_TOKEN;
-
-if(token) {
+const telegramToken = process.env.TELEGRAM_TOKEN;
+if(telegramToken) {
     console.log("Start mode telegram.");
-    const apiClient = new TelegramBotApiClient(token);
+    const apiClient = new TelegramBotApiClient(telegramToken);
     bot.onSendMessage(async (chatId, message) => {
         try {
             await apiClient.sendMessage(chatId, message);
@@ -55,19 +54,22 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-app.post('/new-message', async function(req,res) {
+var router = express.Router();
+router.post('/new-message', async function(req,res) {
     const body = req.body;
     console.log(JSON.stringify(body||{}));
-
     if(body) {
+
         await bot.handle(body);
     }
-
     res.end();
 });
 
-var PORT = process.env.PORT || 5000;
+// Set token
+const apiToken = process.env.API_TOKEN || 'test-token';
+app.use('/'+apiToken, router);
 
-app.listen(PORT, function() {
+var PORT = process.env.PORT || 5000;
+app.listen(PORT, function(){
     console.log(`Titopia bot listening on port ${PORT}!`);
 });
