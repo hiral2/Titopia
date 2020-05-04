@@ -1,4 +1,13 @@
-var emoji = require('node-emoji');
+
+function fixedFromCharCode (codePt) {
+    if (codePt > 0xFFFF) {
+        codePt -= 0x10000;
+        return String.fromCharCode(0xD800 + (codePt >> 10), 0xDC00 + (codePt & 0x3FF));
+    }
+    else {
+        return String.fromCharCode(codePt);
+    }
+}
 
 class MemoryRepository {
     constructor(){
@@ -8,8 +17,8 @@ class MemoryRepository {
             maxVoteToFinish: 10,
             bannedDays: 2,
             showStatusEveryVote: true,
-            votePatterns: [':raised_back_of_hand:', ':thumbsup:', ':+1:' ,':raised_hand_with_fingers_splayed:'].map(e=> emoji.get(e)),
-            unvotePatterns: [':thumbsdown:',':-1:', ':reversed_hand_with_middle_finger_extended:',':middle_finger:'].map(e=> emoji.get(e)),
+            votePatterns: [0x270B].map(e=> fixedFromCharCode(e)),
+            unvotePatterns: [0x1F44E].map(e=> fixedFromCharCode(e)),
             takeOutRegex: /\/out/,
             cancelRegex: /\/cancel/
         }
