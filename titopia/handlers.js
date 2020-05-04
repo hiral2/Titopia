@@ -72,7 +72,7 @@ const takeOutHandler = async ({
     let unvotePattern = config.unvotePatterns.join(' ');
 
     let cancelPattern = config.cancelRegex.toString();
-    cancelPattern = cancelPattern.substring(3, cancelPattern.length - 4);
+    cancelPattern = cancelPattern.substring(3);
 
     if(takeOut.isStarted){
         const userNames = user_infos.map(u=>u.first_name).join(', ');

@@ -2,11 +2,11 @@
 	"voting_not_started": "Voting not started.",
 	"user_required_to_voting": "User required to voting.",
 	"voting_status_title_users_%s": "On time voted for users: %s",
-	"vote_started_from_{{fromName}}_to_{{users}}_votes_{{votes}}_vote_using_{{votePattern}}_unvote_using_{{unvotePattern}}_totals_{{totals}}_cancel_using_{{cancelPattern}}": "Vote started for users {{users}} !\nFor muted only {{votes}} voted is requred, with {{totals}} voted the votation is finished.\n--------------\nTo vote for: {{votePattern}}\nTo vote against: {{unvotePattern}}\n{{fromName}} if you want to cancel use: {{cancelPattern}}",
+	"vote_started_from_{{fromName}}_to_{{users}}_votes_{{votes}}_vote_using_{{votePattern}}_unvote_using_{{unvotePattern}}_totals_{{totals}}_cancel_using_{{cancelPattern}}": "The votation started for users **{{users}}** !\nFor muted only {{votes}} voted is requred, with {{totals}} voted the votation is finished.\n--------------\nTo vote for: {{votePattern}}\nTo vote against: {{unvotePattern}}\n{{fromName}} if you want to **cancel** use: {{cancelPattern}}",
 	"voting_finished": "Voting finished.",
 	"voting_alredy_exists": "Alredy exist a take out voting",
 	"voting_status_body_votes_{{votes}}_{{maxVoteToTakeOut}}_totals_{{totals}}_{{maxVoteToFinish}}": "Votes: {{votes}} of {{maxVoteToTakeOut}}\nTotals: {{totals}} of {{maxVoteToFinish}}",
 	"you_cannot_cancel_the_current_vote": "You cannot cancel the current vote",
 	"vote_canceled": "Vote canceled.",
-	"users_{{users}}_muted_by_{{days}}": "Users {{users}} muted by {{days}} days"
+	"users_{{users}}_muted_by_{{days}}": "Users **{{users}}** muted by {{days}} days"
 }

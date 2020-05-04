@@ -55,7 +55,8 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-app.post('/new-message', async function(req,res) {
+var router = express.Router();
+router.post('/new-message', async function(req,res) {
     const body = req.body;
     console.log(JSON.stringify(body||{}));
 
@@ -66,8 +67,12 @@ app.post('/new-message', async function(req,res) {
     res.end();
 });
 
-var PORT = process.env.PORT || 5000;
 
+const apiToken = process.env.API_TOKEN || 'test-token';
+
+app.use('/'+apiToken, router);
+
+var PORT = process.env.PORT || 5000;
 app.listen(PORT, function(){
     console.log(`Titopia bot listening on port ${PORT}!`);
 });
