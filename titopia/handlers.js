@@ -54,7 +54,7 @@ const takeOutHandler = async ({
 
     const users = entities.map(a=>a.user).filter(a=>a);
 
-    if(!users){
+    if(!users.length){
         return {message: __("user_required_to_voting") };
     }
 
