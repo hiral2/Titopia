@@ -5,8 +5,15 @@
   "main": "index.js",
   "scripts": {
     "start": "node .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint-staged": "lint-staged",
+    "stylelint-staged": "stylelint --syntax scss"
   },
+  "lint-staged": {
+    "*.js": "eslint",
+    "*.scss": "stylelint-staged"
+  },
+  "pre-commit": "lint-staged",
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -18,5 +25,16 @@
   },
   "engines": {
     "node": "10.x"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.8.0",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
