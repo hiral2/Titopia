@@ -10,20 +10,21 @@ var TelegramBotApiClient = require('./telegram/telegramBotApiClient')
 i18n.configure({
     locales:['es', 'en'],
     directory: path.join('./', 'locales'),
-})
+});
 
-var {TitopiaBot} = require('./titopia/titopiaBot')
+var { TitopiaBot } = require('./titopia/titopiaBot');
 var { MemoryRepository } = require('./titopia/repositories');
 
 var repository = new MemoryRepository();
 var bot = new TitopiaBot(repository, i18n);
 
-const token = process.env.TELEGRAM_TOKEN;
+const token = "821334919:AAFf4q2m9hOGMXLtjsOZJK0eI7thDeClcww ";// process.env.TELEGRAM_TOKEN;
 
 if(token) {
     console.log("Start mode telegram.");
     const apiClient = new TelegramBotApiClient(token);
-    bot.onSendMessage(async (chatId, message)=>{
+    bot.onSendMessage(async (chatId, message) => {
+        console.log(message);
         try {
             await apiClient.sendMessage(chatId, message);
         } catch (e) {
@@ -31,7 +32,7 @@ if(token) {
         }
     });
 
-    bot.onRestrictUsers(async (chatId, users, untilTime)=>{
+    bot.onRestrictUsers(async (chatId, users, untilTime) => {
         const tasks = users.map(user => apiClient.restrictChatMember(chatId, user.id, untilTime));
         try {
             await Promise.all(tasks);
@@ -39,7 +40,7 @@ if(token) {
             console.error(e);
         }
     });
-}else{
+} else {
     console.log("Start mode console.");
     bot.onSendMessage((chatId, message)=>{
         console.log('onSendMessage:', chatId, message);
@@ -59,7 +60,7 @@ app.post('/new-message', async function(req,res) {
     const body = req.body;
     console.log(JSON.stringify(body||{}));
 
-    if(body){
+    if(body) {
         await bot.handle(body);
     }
 
@@ -68,6 +69,6 @@ app.post('/new-message', async function(req,res) {
 
 var PORT = process.env.PORT || 5000;
 
-app.listen(PORT, function(){
+app.listen(PORT, function() {
     console.log(`Titopia bot listening on port ${PORT}!`);
 });

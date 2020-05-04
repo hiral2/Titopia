@@ -1,9 +1,10 @@
+/* eslint-disable camelcase */
 const axios = require('axios')
 
 const defaultUrl = 'https://api.telegram.org';
 
 class TelegramBotApiClient {
-    constructor(token, apiUrl = defaultUrl){
+    constructor(token, apiUrl = defaultUrl) {
         this.token = token;
         this.apiUrl = apiUrl;
     }
@@ -15,16 +16,14 @@ class TelegramBotApiClient {
         })
     }
 
-    restrictChatMember(chatId, userId, time, permissions = ['can_send_messages', 'can_send_media_messages', 'can_send_polls']) {
+    restrictChatMember(chat_id, user_id, until_time, permissions = ['can_send_messages', 'can_send_media_messages', 'can_send_polls']) {
         return axios.post(`${this.apiUrl}/bot${this.token}/restrictChatMember`,{
-            chat_id: chatId,
-            user_id: userId,
-            until_time: time,
-            permissions: permissions,
+            chat_id,
+            user_id,
+            until_time,
+            permissions,
         });
     }
 }
-
-
 
 module.exports = TelegramBotApiClient;

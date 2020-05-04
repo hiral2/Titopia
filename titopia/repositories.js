@@ -10,23 +10,23 @@ function fixedFromCharCode (codePt) {
 }
 
 class MemoryRepository {
-    constructor(){
+    constructor() {
         this.chats = {};
         this.defaultChatConfig = {
             maxVoteToTakeOut:5,
             maxVoteToFinish: 10,
             bannedDays: 2,
             showStatusEveryVote: true,
-            votePatterns: [0x270B].map(e=> fixedFromCharCode(e)),
-            unvotePatterns: [0x1F44E].map(e=> fixedFromCharCode(e)),
+            votePatterns: [0x270B].map(e => fixedFromCharCode(e)),
+            unvotePatterns: [0x1F44E].map(e => fixedFromCharCode(e)),
             takeOutRegex: /\/out/,
             cancelRegex: /\/cancel/
         }
     }
 
-    findChat(chatId){
+    findChat(chatId) {
         let chat = this.chats[chatId];
-        if(!chat){
+        if(!chat) {
             chat = {
                 id: chatId,
                 config: {...this.defaultChatConfig}
@@ -38,7 +38,7 @@ class MemoryRepository {
 }
 
 class MemoryChatRecord {
-    constructor(chat){
+    constructor(chat) {
         this.chat = chat;
     }
 
@@ -50,27 +50,27 @@ class MemoryChatRecord {
         return Promise.resolve(currentTakeOut);
     }
 
-    getConfig(){
+    getConfig() {
         return this.chat.config;
     }
 
     clearCurrentTakeOut(until) {
-        if(this.chat.takeOut && this.chat.takeOut.current){
-            this.chat.takeOut.current.finished_at = new Date().getUTCDate();
-            this.chat.takeOut.current.banned_at = until;
+        if(this.chat.takeOut && this.chat.takeOut.current) {
+            this.chat.takeOut.current.finishedAt = new Date().getUTCDate();
+            this.chat.takeOut.current.bannedAt = until;
             (this.chat.takeOut.histories = (this.chat.takeOut.histories || [])).splice(0,0, this.chat.takeOut.current);
-            this.chat.takeOut.current=undefined;
+            this.chat.takeOut.current = undefined;
         }
         return Promise.resolve();
     }
 
-    isAnyVotation(){
+    isAnyVotation() {
         return this.chat.takeOut && this.chat.takeOut.current; 
     }
 
     getCurrentTekeOut() {
         let to;
-        if (this.isAnyVotation()){
+        if (this.isAnyVotation()) {
             to = this.chat.takeOut.current;
         }
 
@@ -78,15 +78,15 @@ class MemoryChatRecord {
     }
 
     startNewTakeOut(users, from) {
-        if(this.isAnyVotation()){
+        if(this.isAnyVotation()) {
             return Promise.resolve({isStarted: false});
         } else {
-            if (!this.chat.takeOut){
+            if (!this.chat.takeOut) {
                 this.chat.takeOut = {};
             }
             this.chat.takeOut.current = {
-                users: users,
-                from: from,
+                users,
+                from,
                 votes: {}
             }
             return Promise.resolve({isStarted: true});
@@ -100,7 +100,7 @@ class MemoryChatRecord {
             takeObjectObj.votes[userId] = tod;
 
             const votes = Object.values(takeObjectObj.votes);
-            const voteTakeOut = votes.filter(v=>v).length;
+            const voteTakeOut = votes.filter(v => v).length;
             
             const takeOut = voteTakeOut >= this.chat.config.maxVoteToTakeOut;
             const finished = takeOut || votes.length >= this.chat.config.maxVoteToFinish;
@@ -112,7 +112,7 @@ class MemoryChatRecord {
                 finished,
                 done: true
             });
-        }else{
+        } else {
             return Promise.resolve({
                 done: false,
             }); 

@@ -13,7 +13,7 @@ const events = {
 }
 
 class TitopiaBot {
-    constructor(repository, i18n){
+    constructor(repository, i18n) {
         this.__ = i18n.__;
         this.repository = repository;
         this.handlers = [];
@@ -33,10 +33,10 @@ class TitopiaBot {
         this.emitter.on(events.RESTRICT_USERS, eventHandler);
     }
 
-    init(){
+    init() {
         this.addCommand((text, chat) => chat.getConfig().takeOutRegex.test(text), takeOutHandler);
-        this.addCommand((text, chat) => chat.getConfig().votePatterns.some(p=> text.indexOf(p)>=0), buildVoteHandler(true));
-        this.addCommand((text, chat) => chat.getConfig().unvotePatterns.some(p=> text.indexOf(p)>=0), buildVoteHandler(false));
+        this.addCommand((text, chat) => chat.getConfig().votePatterns.some(p => text.indexOf(p) >= 0), buildVoteHandler(true));
+        this.addCommand((text, chat) => chat.getConfig().unvotePatterns.some(p => text.indexOf(p) >= 0), buildVoteHandler(false));
         this.addCommand((text) => this.config.statusRegex.test(text), statusHandler);
         this.addCommand((text, chat) => chat.getConfig().cancelRegex.test(text), cancelHandler);
     }
@@ -49,7 +49,7 @@ class TitopiaBot {
         this.emitter.emit(events.RESTRICT_USERS, chatId, users, untilTime);
     }
 
-    addCommand(match, handle){
+    addCommand(match, handle) {
         this.handlers.push({
             match: match,
             handle: handle
@@ -57,48 +57,39 @@ class TitopiaBot {
     }
 
     async handle(body) {
-        const {message} = body;
+        const { message } = body;
 
-        if(!message){
+        if(!message) {
             return;
         }
 
         const { chat, text, from } = message;
 
-        if (!text){
-            return;
-        }
-
-        if (!chat){
-            return;
-        }
-
-        if (!from){
+        if(!text || !chat || !from) {
             return;
         }
 
         const chatRecord = await this.repository.findChat(chat.id);
-        const handler = this.handlers.find(t=>t.match(text, chatRecord));
+        const handler = this.handlers.find(t => t.match(text, chatRecord));
         const messages = [];
 
-        if(handler){
+        if(handler) {
             const result = await handler.handle({body, chatRecord, from, __: this.__});
-            if (result.takeOut) {
+            if(result.takeOut) {
                 this.restrictUsers(chat.id, result.users, result.untilTime);
             }
             
-            if(result.message){
+            if(result.message) {
                 messages.push(result);
             }
         }
 
-        if(messages.length){
+        if(messages.length) {
             const msj = messages.map(m => m.message).join(',');
             this.sendSimpleMessageToChat(chat.id, msj);
         }
     }
 }
-
 
 module.exports = {
     TitopiaBot
