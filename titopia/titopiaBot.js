@@ -81,7 +81,6 @@ class TitopiaBot {
 
         const chatRecord = await this.repository.findChat(chat.id);
 
-        console.log('locale', chatRecord.getConfig().lang);
         this.i18n.setLocale(chatRecord.getConfig().lang);
         const handler = this.handlers.find(t=>t.match(text, chatRecord));
 

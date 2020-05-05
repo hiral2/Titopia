@@ -24,7 +24,7 @@ const stopHandler = async({
     const current = await chatRecord.getCurrentTakeOut();
 
     if (current) {
-        if(current.from.id == from.id){
+        if( current.users.some(u=>u.id==from.id)) {
             return {
                 message: i18n.__('%s nice_try_but_no', getFullName(from))
             }
