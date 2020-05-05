@@ -10,13 +10,33 @@ const startHandler = async({
     }
 }
 
+const getFullName = (from) => {
+    return  ((from.first_name || '') + ' ' + (from.last_name || '')).trim();
+}
+
 const stopHandler = async({ 
     i18n,
+    from,
     chatRecord
 }) => {
+
     chatRecord.stop();
-    return {
-        message: i18n.__('stopped')
+    const current = await chatRecord.getCurrentTakeOut();
+
+    if (current) {
+        if(current.from.id == from.id){
+            return {
+                message: i18n.__('%s nice_try_but_no', getFullName(from))
+            }
+        }else{
+            return {
+                message: i18n.__('cant_close_in_current_take_out')
+            }
+        }
+    } else {
+        return {
+            message: i18n.__('stopped')
+        }
     }
 }
 
@@ -125,7 +145,7 @@ const takeOutHandler = async ({
         return {
             message: i18n.__('vote_started_from_{{fromName}}_to_{{users}}_votes_{{votes}}_vote_using_{{votePattern}}_unvote_using_{{unvotePattern}}_totals_{{totals}}_cancel_using_{{cancelPattern}}', { 
                 users:userNames, 
-                fromName: ((from.first_name || '') + ' ' + (from.last_name || '')).trim(),
+                fromName: getFullName(from),
                 cancelPattern: cancelPattern,
                 votes:chatRecord.getConfig().maxVoteToTakeOut, 
                 votePattern: votePattern,

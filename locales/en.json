@@ -13,5 +13,7 @@
 	"stopped": "**Titopia** is stopped",
 	"lang_required %s": "Lang is required, please use one of this lang: %s",
 	"lang_not_found": "Lang not found",
-	"lang_changed": "Lang changed"
+	"lang_changed": "Lang changed",
+	"cant_close_in_current_take_out": "You can't to close in current take out.",
+	"%s nice_try_but_no":"%s nice try but no."
 }
