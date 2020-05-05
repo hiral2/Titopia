@@ -19,8 +19,6 @@ const stopHandler = async({
     from,
     chatRecord
 }) => {
-
-    chatRecord.stop();
     const current = await chatRecord.getCurrentTakeOut();
 
     if (current) {
@@ -34,6 +32,7 @@ const stopHandler = async({
             }
         }
     } else {
+        chatRecord.stop();
         return {
             message: i18n.__('stopped')
         }
