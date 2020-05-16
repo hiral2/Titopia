@@ -37,7 +37,7 @@ class MessageService {
         const messageKey = this.codeMapping[code];
         if(code == codes.LANG_REQUIRED){
             metadata = {
-                langs:  i18n.getLocales().join(', ')
+                langs:  this.i18n.getLocales().join(', ')
             };
         }
         return  this.i18n.__(messageKey, {...metadata})
