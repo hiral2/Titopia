@@ -38,6 +38,10 @@ const stopHandler = async({
     from,
     chatRecord
 }) => {
+    if(!from){
+        throw new Error('Property from is required.')
+    }
+    
     const current = await chatRecord.getCurrentTakeOut();
 
     if (current) {
@@ -89,6 +93,11 @@ const setLangHandler = (messageService) => async({
 
 const getStatusMessage = async (chatRecord) => {
     const takeOut = await chatRecord.getCurrentTakeOut();
+
+    if(!takeOut){
+        return;
+    }
+
     const config = chatRecord.getConfig();
 
     const values = Object.values(takeOut.votes);
@@ -164,10 +173,10 @@ const takeOutHandler = async ({
     }
 
     const user_infos = users.map(u=>({
-            id: u.id,
-            first_name: u.first_name,
-            last_name: u.last_name
-        }))
+        id: u.id,
+        first_name: u.first_name,
+        last_name: u.last_name
+    }))
 
     const takeOut = await chatRecord.startNewTakeOut(user_infos, from);
     const config = chatRecord.getConfig();
@@ -200,42 +209,42 @@ const takeOutHandler = async ({
 }
 
 const buildVoteHandler = (vote) => async ({
-        chatRecord, 
-        from
-    }) => {
-        const voteResult = await chatRecord.vote(from.id,vote); 
+    chatRecord, 
+    from
+}) => {
+    const voteResult = await chatRecord.vote(from.id,vote); 
 
-        if(!voteResult.done){
+    if(!voteResult.done){
+        return;
+    }
+
+    const config = chatRecord.getConfig();
+    if(!voteResult.finished){
+        if (voteResult.changed && config.showStatusEveryVote) {
+            return getStatusMessage(chatRecord);
+        }else{
             return;
         }
-
-        const config = chatRecord.getConfig();
-        if(!voteResult.finished){
-            if (voteResult.changed && config.showStatusEveryVote) {
-                return getStatusMessage(chatRecord);
-            }else{
-                return;
-            }
-        }
-
-        const userNames = voteResult.users.map(u=>u.first_name).join(', ');
-        if (voteResult.takeOut) {
-            const untilTime = moment().utc().add(config.bannedDays, 'days').valueOf()
-            await chatRecord.clearCurrentTakeOut(untilTime);
-            return {
-                ...voteResult,
-                untilTime,
-                code: codes.USERS_MUTED,
-                metadata: { users:userNames, days: config.bannedDays },
-            };
-        }else{
-            await chatRecord.clearCurrentTakeOut();
-            return {
-                ...voteResult,
-                code: codes.VOTING_FINISHED,
-            };
-        }
     }
+
+    const userNames = voteResult.users.map(u=>u.first_name).join(', ');
+    if (voteResult.takeOut) {
+        const untilTime = moment().utc().add(config.bannedDays, 'days').valueOf()
+        await chatRecord.clearCurrentTakeOut(untilTime);
+        return {
+            ...voteResult,
+            untilTime,
+            code: codes.USERS_MUTED,
+            metadata: { users:userNames, days: config.bannedDays },
+        };
+    }else{
+        await chatRecord.clearCurrentTakeOut();
+        return {
+            ...voteResult,
+            code: codes.VOTING_FINISHED,
+        };
+    }
+}
 
 const cancelHandler = async ({
     chatRecord, 
@@ -254,7 +263,6 @@ const cancelHandler = async ({
 
     }else{
         await chatRecord.clearCurrentTakeOut();
-
         return {
             code: codes.VOTE_CANCELED
         }
@@ -266,8 +274,6 @@ const setUserHandler = async ({
     from
 }) => {
     await chatRecord.setUsers([from]);
-
-    console.log('Set user', from);
 }
 
 module.exports = {

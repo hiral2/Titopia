@@ -16,7 +16,7 @@ const events = {
     RESTRICT_USERS: "restrictUsers"
 }
 
-const commands = {
+const commandKeys = {
     TAKE_OUT: "TAKE_OUT",
     VOTE_FOR: "VOTE_FOR",
     VOTE_AGAINST: "VOTE_AGAINST",
@@ -28,23 +28,69 @@ const commands = {
     SET_USER: "SET_USER"
 }
 
+const defaultCommands = [
+    { 
+        match: ({text, chatRecord}) => chatRecord.isEnabled() && chatRecord.getConfig().takeOutRegex.test(text),
+        key: commandKeys.TAKE_OUT,
+        handler: takeOutHandler,
+    },
+    { 
+        match: ({text, chatRecord}) => chatRecord.isEnabled() && chatRecord.getConfig().votePatterns.some(p=> text.indexOf(p)>=0),
+        key: commandKeys.VOTE_FOR,
+        handler: buildVoteHandler(true),
+    },
+    { 
+        match: ({text, chatRecord}) => chatRecord.isEnabled() && chatRecord.getConfig().unvotePatterns.some(p=> text.indexOf(p)>=0),
+        key: commandKeys.VOTE_AGAINST,
+        handler: buildVoteHandler(false),
+    },
+    { 
+        match: ({text, chatRecord, config}) => chatRecord.isEnabled() && config.statusRegex.test(text),
+        key: commandKeys.STATUS,
+        handler: statusHandler
+    },
+    { 
+        match: ({text, chatRecord}) => chatRecord.isEnabled() && chatRecord.getConfig().cancelRegex.test(text),
+        key: commandKeys.CANCEL,
+        handler: cancelHandler
+    },
+    { 
+        match: ({text, config}) => config.startRegex.test(text),
+        key: commandKeys.START,
+        handler: startHandler
+    },
+    { 
+        match: ({text, chatRecord, config}) => chatRecord.isEnabled() && config.stopRegex.test(text),
+        key: commandKeys.STOP,
+        handler: stopHandler    
+    },
+    { 
+        match: ({text, chatRecord, config}) => chatRecord.isEnabled() && config.langRegex.test(text),
+        key: commandKeys.SET_LANG,
+        handler: setLangHandler(this.messageService)
+    },
+    { 
+        match: () => true,
+        key: commandKeys.SET_USER,
+        handler: setUserHandler
+    }
+]
+
+const defaultConfig = {
+    statusRegex: /\/status/,
+    cancelRegex: /\/cancel/,
+    startRegex: /\/start/,
+    stopRegex: /\/stop/,
+    langRegex: /^\/lang/
+}
+
 class TitopiaBot {
-    constructor(repository, messageService){
+    constructor(repository, messageService, commands = defaultCommands){
+        this.emitter = new EventEmitter();
         this.messageService = messageService;
         this.repository = repository;
-        this.handlers = [];
-        this.emitter = new EventEmitter();
-        this.config = {
-            statusRegex: /\/status/,
-            cancelRegex: /\/cancel/,
-            startRegex: /\/start/,
-            stopRegex: /\/stop/,
-            langRegex: /^\/lang/
-        }
-
-        this.commandKeys = [];
-
-        this.init();
+        this.config = {...defaultConfig}
+        this.commands = commands;
     }
 
     onSendMessage(eventHandler) {
@@ -55,31 +101,7 @@ class TitopiaBot {
         this.emitter.on(events.RESTRICT_USERS, eventHandler);
     }
 
-    init(){
-        this.commands = {
-            [commands.TAKE_OUT]: takeOutHandler,
-            [commands.VOTE_FOR]: buildVoteHandler(true),
-            [commands.VOTE_AGAINST]: buildVoteHandler(false),
-            [commands.STATUS]: statusHandler,
-            [commands.CANCEL]: cancelHandler,
-            [commands.START]: startHandler,
-            [commands.STOP]: stopHandler,
-            [commands.SET_LANG]: setLangHandler(this.messageService),
-            [commands.SET_USER]: setUserHandler
-        };
-
-        this.addCommand((text, chat) => chat.isEnabled() && chat.getConfig().takeOutRegex.test(text), commands.TAKE_OUT);
-        this.addCommand((text, chat) => chat.isEnabled() && chat.getConfig().votePatterns.some(p=> text.indexOf(p)>=0), commands.VOTE_FOR);
-        this.addCommand((text, chat) => chat.isEnabled() && chat.getConfig().unvotePatterns.some(p=> text.indexOf(p)>=0), commands.VOTE_AGAINST);
-        this.addCommand((text, chat) => chat.isEnabled() && this.config.statusRegex.test(text), commands.STATUS);
-        this.addCommand((text, chat) => chat.isEnabled() && chat.getConfig().cancelRegex.test(text), commands.CANCEL);
-        this.addCommand((text)       => this.config.startRegex.test(text), commands.START);
-        this.addCommand((text, chat) => chat.isEnabled() && this.config.stopRegex.test(text), commands.STOP);
-        this.addCommand((text, chat) => chat.isEnabled() && this.config.langRegex.test(text), commands.SET_LANG);
-        this.addCommand(() => true, commands.SET_USER);
-    }
-
-    sendSimpleMessageToChat(chatId, message) {
+    sendMessage(chatId, message) {
         this.emitter.emit(events.SEND_MESSAGE, chatId, message);
     }
 
@@ -87,76 +109,67 @@ class TitopiaBot {
         this.emitter.emit(events.RESTRICT_USERS, chatId, users, untilTime);
     }
 
-    addCommand(match, commandKey){
-        this.commandKeys.push({
-            match: match,
-            commandKey: commandKey
-        });
-    }
-
-    findCommandKey(text, chatRecord){
-        return this.commandKeys.filter(ck => ck.match(text, chatRecord));
-    }
-
     async handle(body) {
-
-        if(!body){
-            throw new Error("The body can't be empty");
-        }
-
-        const {message} = body;
-
-        if(!message){
+        if (!this.isValidBody(body)){
             return;
         }
 
-        const { chat, text, from } = message;
-
-        if (!text || !chat || !from){
-            return;
-        }
+        const { message: { chat } } = body;
 
         const chatRecord = await this.repository.findChat(chat.id);
-        const cmds = this.findCommandKey(text, chatRecord);
+        const cmds = this.findCommands({text, chatRecord});
 
-        let responses = [];
+        let responses = cmds.map(cmd=> this.executeCommand(cmd, chatRecord, message))
+                            .filter(message);
         
-        for(let cmd of cmds){
-            const command = this.commands[cmd.commandKey];
-    
-            if(!command){
-                console.log(`Command: ${cmd.commandKey} not found.`);
-                return;
-            }
-    
-            const result = await command({
-                body, 
-                text, 
-                chatRecord, 
-                from
-            });
-    
-            console.log(result);
-            if (result) {
-                if (result.takeOut) {
-                    this.restrictUsers(chat.id, result.users, result.untilTime);
-                }
-    
-                if(result.code){
-                    const lang = chatRecord.getConfig().lang;
-                    const message = this.messageService.getMessage(lang, result.code, result.metadata); 
-                    responses.push(message);
-                }
-            }
+        for (const resp of responses) {
+            this.sendMessage(chat.id, resp);
         }
+    }
 
-        if (responses.length>0){
-            this.sendSimpleMessageToChat(chat.id, responses.join('\n'));
+    findCommands(context){
+        const fullContext = {...context, config: this.config };
+        return this.commands.filter(ck => ck.match(fullContext) );
+    }
+
+    async executeCommand(
+        command,  
+        chatRecord, 
+        message
+    ){
+        const { chat, text, from } = message;
+
+        const result = await command({
+            chatRecord, 
+            body, 
+            text, 
+            from
+        });
+
+        if (result) {
+            if (result.takeOut) {
+                this.restrictUsers(chat.id, result.users, result.untilTime);
+            }
+
+            if(result.code){
+                const lang = chatRecord.getConfig().lang;
+                const message = this.messageService.getMessage(lang, result.code, result.metadata); 
+                return message;
+            }
         }
+    }
+
+    isValidBody(body)  {
+        return body && body.message && this.isValidMessage(body.message) ? true : false;
+    }
+
+    isValidMessage(message)  {
+        const { chat, text, from } = message;
+        return text && chat && from ? true : false;
     }
 }
 
-
 module.exports = {
-    TitopiaBot
+    TitopiaBot,
+    commandKeys
 }

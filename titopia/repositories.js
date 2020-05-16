@@ -9,31 +9,38 @@ function fixedFromCharCode (codePt) {
     }
 }
 
+const defaultChatConfig = {
+    enabled: false,
+    maxVoteToTakeOut:5,
+    maxVoteToFinish: 10,
+    bannedDays: 2,
+    showStatusEveryVote: true,
+    votePatterns: [0x270B].map(e=> fixedFromCharCode(e)),
+    unvotePatterns: [0x1F44E].map(e=> fixedFromCharCode(e)),
+    takeOutRegex: /\/out/,
+    cancelRegex: /\/cancel/,
+    lang: 'en'
+}
+
+const buildChat = (chatId, config = defaultChatConfig) => {
+    return {
+        enabled: false,
+        users: [],
+        id: chatId,
+        config: {...config}
+    };
+}
+
 class MemoryRepository {
-    constructor(){
+    constructor(initialDefaultChatConfig = defaultChatConfig){
         this.chats = {};
-        this.defaultChatConfig = {
-            enabled: false,
-            maxVoteToTakeOut:5,
-            maxVoteToFinish: 10,
-            bannedDays: 2,
-            showStatusEveryVote: true,
-            votePatterns: [0x270B].map(e=> fixedFromCharCode(e)),
-            unvotePatterns: [0x1F44E].map(e=> fixedFromCharCode(e)),
-            takeOutRegex: /\/out/,
-            cancelRegex: /\/cancel/,
-            lang: 'en'
-        }
+        this.defaultChatConfig = { ...initialDefaultChatConfig }
     }
 
     findChat(chatId){
         let chat = this.chats[chatId];
         if(!chat){
-            chat = {
-                users: [],
-                id: chatId,
-                config: {...this.defaultChatConfig}
-            };
+            chat = buildChat(chatId, this.defaultChatConfig);
             this.chats[chatId] = chat;
         }
         return Promise.resolve(new MemoryChatRecord(chat));
@@ -154,5 +161,8 @@ class MemoryChatRecord {
 }
 
 module.exports = {
-    MemoryRepository
+    MemoryRepository,
+    MemoryChatRecord,
+    defaultChatConfig,
+    buildChat
 }
