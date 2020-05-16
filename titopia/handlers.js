@@ -103,8 +103,7 @@ const getStatusMessage = async (chatRecord) => {
             maxVoteToTakeOut: config.maxVoteToTakeOut,
             totals: values.length,
             maxVoteToFinish: config.maxVoteToFinish
-        },
-        message: [voteStatusTitle, voteStatusBody].join('\n')
+        }
     }
 }
 
@@ -189,7 +188,7 @@ const takeOutHandler = async ({
                 cancelPattern: cancelPattern,
                 votes:chatRecord.getConfig().maxVoteToTakeOut, 
                 votePattern: votePattern,
-                unvoteOattern: unvotePattern,
+                unvotePattern: unvotePattern,
                 totals: chatRecord.getConfig().maxVoteToFinish 
             }
         };
