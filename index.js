@@ -4,6 +4,7 @@ var bodyParser = require('body-parser')
 
 var i18n = require('i18n');
 var path = require('path');
+var { MessageService } = require('./titopia/messageService');
 
 var TelegramBotApiClient = require('./telegram/telegramBotApiClient')
 
@@ -16,9 +17,10 @@ var {TitopiaBot} = require('./titopia/titopiaBot')
 var { MemoryRepository } = require('./titopia/repositories');
 
 var repository = new MemoryRepository();
-var bot = new TitopiaBot(repository, i18n);
+var bot = new TitopiaBot(repository, new MessageService(i18n));
 
 const telegramToken = process.env.TELEGRAM_TOKEN;
+
 if(telegramToken) {
     console.log("Start mode telegram.");
     const apiClient = new TelegramBotApiClient(telegramToken);

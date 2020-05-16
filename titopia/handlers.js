@@ -1,12 +1,32 @@
 var moment = require('moment');
 
+const codes = {
+    NICE_TRY_BUT_NOT: 1,
+    CANT_CLOSE_IN_CURRENT_TAKE_OUT: 2,
+    STOPPED: 3,
+    VOTING_NOT_STARTED: 4,
+    STARTED: 5,
+    LANG_REQUIRED: 6,
+    LANG_NOT_FOUND: 7,
+    VOTE_CANCELED: 8,
+    LANG_CHANGED: 9,
+    VOTING_STATUS_TITLE_USERS: 10,
+    STATUS: 11,
+    USER_REQUIRED_TO_VOTING: 12,
+    VOTE_STARTED: 13,
+    VOTING_ALREDY_EXISTS: 14,
+    USERS_MUTED: 15,
+    VOTING_FINISHED: 16,
+    YOU_CANNOT_CANCEL_THE_CURRENT_VOTE: 17,
+    USERS_NOT_FOUND: 18
+}
+
 const startHandler = async({ 
-    i18n,
     chatRecord
 }) => {
     chatRecord.start();
     return {
-        message: i18n.__('started')
+        code: codes.STARTED
     }
 }
 
@@ -15,7 +35,6 @@ const getFullName = (from) => {
 }
 
 const stopHandler = async({ 
-    i18n,
     from,
     chatRecord
 }) => {
@@ -24,50 +43,51 @@ const stopHandler = async({
     if (current) {
         if( current.users.some(u=>u.id==from.id)) {
             return {
-                message: i18n.__('%s nice_try_but_no', getFullName(from))
+                code: codes.NICE_TRY_BUT_NOT,
+                metadata: { 
+                    name: getFullName(from) 
+                },
             }
         }else{
             return {
-                message: i18n.__('cant_close_in_current_take_out')
+                code: codes.CANT_CLOSE_IN_CURRENT_TAKE_OUT,
             }
         }
     } else {
         chatRecord.stop();
         return {
-            message: i18n.__('stopped')
+            code: codes.STOPPED,
         }
     }
 }
 
-const setLangHandler = async({ 
-    i18n,
-    text,
-    chatRecord
-}) => {
-    
+const setLangHandler = (messageService) => async({ 
+        text,
+        chatRecord
+    }) => {
     const lang = (text.split(' ')[1] || '').trim();
 
     if(!lang){
         return {
-            message: i18n.__('lang_required %s', i18n.getLocales().join(', '))
+            code: codes.LANG_REQUIRED
         }
     }
 
-    if(!i18n.getLocales().some(l => l==lang)){
+    const langFound = messageService.contains(lang); 
+    if(!langFound){
         return {
-            message: i18n.__('lang_not_found')
+            code: codes.LANG_NOT_FOUND
         }
     }
 
     chatRecord.setLang(lang);
-    i18n.setLocale(lang);
-
     return {
-        message: i18n.__('lang_changed')
+        code: codes.LANG_CHANGED
     }
 }
 
-const getStatusMessage = async (i18n,chatRecord) => {
+
+const getStatusMessage = async (chatRecord) => {
     const takeOut = await chatRecord.getCurrentTakeOut();
     const config = chatRecord.getConfig();
 
@@ -75,40 +95,38 @@ const getStatusMessage = async (i18n,chatRecord) => {
     const takeOutVotes = values.filter(v=>v);
     const userNames = takeOut.users.map(u=>u.first_name).join(', ');
 
-    const voteStatusTitle = i18n.__('voting_status_title_users_%s', userNames);
-    const voteStatusBody = i18n.__('voting_status_body_votes_{{votes}}_{{maxVoteToTakeOut}}_totals_{{totals}}_{{maxVoteToFinish}}', {
-        votes: takeOutVotes.length,
-        maxVoteToTakeOut: config.maxVoteToTakeOut,
-        totals: values.length,
-        maxVoteToFinish: config.maxVoteToFinish
-    });
     return {
+        code: codes.STATUS,
+        metadata: {
+            usernames: userNames,
+            votes: takeOutVotes.length,
+            maxVoteToTakeOut: config.maxVoteToTakeOut,
+            totals: values.length,
+            maxVoteToFinish: config.maxVoteToFinish
+        },
         message: [voteStatusTitle, voteStatusBody].join('\n')
     }
 }
 
 const statusHandler = async ({
-        chatRecord,
-        i18n
+        chatRecord
 }) => {
     const takeOut = await chatRecord.getCurrentTakeOut();
-
     if(!takeOut){
         return {
-            message: i18n.__("voting_not_started")
+            code: codes.VOTING_NOT_STARTED
         }
     }
 
-    return await getStatusMessage(i18n, chatRecord);
+    return await getStatusMessage(chatRecord);
 }
 
 const takeOutHandler = async ({
     body,
-    i18n, 
     chatRecord, 
     from
 }) => {
-    const { message: { entities } } = body;
+    const { message: { entities, text } } = body;
 
     if(from.is_bot){
         return false;
@@ -118,10 +136,32 @@ const takeOutHandler = async ({
         return false;    
     }
 
-    const users = entities.map(a=>a.user).filter(a=>a);
+    const users = entities.filter(a=>a.type=='text_mention' && a.user).map(a=>a.user);
+    chatRecord.setUsers(users);
+
+    const username_mentions = entities.filter(a=>a.type=='mention').map(t=> text.substr(t.offset+1, t.length-1));
+
+    if(username_mentions.length){
+        const chatUsers = chatRecord.getUsers();
+        const userFounds = chatUsers.filter(cu => username_mentions.some(um => um == cu.username));
+
+        const usernameNotFounds = username_mentions.filter(um => !userFounds.some(uf => uf.username == um));
+        if(usernameNotFounds.length){
+            return {
+                code: codes.USERS_NOT_FOUND,
+                metadata: {
+                    usernames: usernameNotFounds.join(', ')
+                }
+            }
+        }
+
+        users.push(...userFounds);
+    }
 
     if(!users.length){
-        return {message: i18n.__("user_required_to_voting") };
+        return {
+            code: codes.USER_REQUIRED_TO_VOTING
+        };
     }
 
     const user_infos = users.map(u=>({
@@ -142,7 +182,8 @@ const takeOutHandler = async ({
     if(takeOut.isStarted){
         const userNames = user_infos.map(u=>u.first_name).join(', ');
         return {
-            message: i18n.__('vote_started_from_{{fromName}}_to_{{users}}_votes_{{votes}}_vote_using_{{votePattern}}_unvote_using_{{unvotePattern}}_totals_{{totals}}_cancel_using_{{cancelPattern}}', { 
+            code: codes.VOTE_STARTED,
+            metadata: {
                 users:userNames, 
                 fromName: getFullName(from),
                 cancelPattern: cancelPattern,
@@ -150,31 +191,31 @@ const takeOutHandler = async ({
                 votePattern: votePattern,
                 unvoteOattern: unvotePattern,
                 totals: chatRecord.getConfig().maxVoteToFinish 
-            })
+            }
         };
     }else{
         return {
-            message: i18n.__('voting_alredy_exists')
+            code: codes.VOTING_ALREDY_EXISTS
         }
     }
 }
+
 const buildVoteHandler = (vote) => async ({
-        i18n, 
         chatRecord, 
         from
     }) => {
         const voteResult = await chatRecord.vote(from.id,vote); 
 
         if(!voteResult.done){
-            return false;
+            return;
         }
 
         const config = chatRecord.getConfig();
         if(!voteResult.finished){
             if (voteResult.changed && config.showStatusEveryVote) {
-                return getStatusMessage(i18n, chatRecord);
+                return getStatusMessage(chatRecord);
             }else{
-                return false;
+                return;
             }
         }
 
@@ -185,19 +226,19 @@ const buildVoteHandler = (vote) => async ({
             return {
                 ...voteResult,
                 untilTime,
-                message: i18n.__('users_{{users}}_muted_by_{{days}}', { users:userNames, days: config.bannedDays })
+                code: codes.USERS_MUTED,
+                metadata: { users:userNames, days: config.bannedDays },
             };
         }else{
             await chatRecord.clearCurrentTakeOut();
             return {
                 ...voteResult,
-                message: i18n.__('voting_finished')
+                code: codes.VOTING_FINISHED,
             };
         }
     }
 
 const cancelHandler = async ({
-    i18n, 
     chatRecord, 
     from
 }) => {
@@ -209,16 +250,25 @@ const cancelHandler = async ({
 
     if(from.id!=takeOut.from.id){
         return {
-            message: i18n.__('you_cannot_cancel_the_current_vote')
+            code: codes.YOU_CANNOT_CANCEL_THE_CURRENT_VOTE,
         }
 
     }else{
         await chatRecord.clearCurrentTakeOut();
 
         return {
-            message: i18n.__('vote_canceled')
+            code: codes.VOTE_CANCELED
         }
     }
+}
+
+const setUserHandler = async ({
+    chatRecord, 
+    from
+}) => {
+    await chatRecord.setUsers([from]);
+
+    console.log('Set user', from);
 }
 
 module.exports = {
@@ -228,5 +278,7 @@ module.exports = {
     cancelHandler,
     setLangHandler,
     stopHandler,
-    startHandler
+    startHandler,
+    setUserHandler,
+    codes
 };

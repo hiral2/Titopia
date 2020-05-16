@@ -30,6 +30,7 @@ class MemoryRepository {
         let chat = this.chats[chatId];
         if(!chat){
             chat = {
+                users: [],
                 id: chatId,
                 config: {...this.defaultChatConfig}
             };
@@ -74,6 +75,16 @@ class MemoryChatRecord {
 
     getLang(){
         return this.getConfig().lang;
+    }
+
+    setUsers(users) {
+        const updateUsers = this.chat.users.filter(u=> !users.some(us => us.id == u.id));
+        updateUsers.push(...users);
+        this.chat.users = updateUsers;
+    }
+
+    getUsers(){
+        return this.chat.users;
     }
 
     clearCurrentTakeOut(until) {

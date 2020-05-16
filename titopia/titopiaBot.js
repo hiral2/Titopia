@@ -5,7 +5,8 @@ var {
     cancelHandler,
     setLangHandler,
     startHandler,
-    stopHandler
+    stopHandler,
+    setUserHandler
 } = require('./handlers');
 
 var EventEmitter = require('events');
@@ -15,9 +16,21 @@ const events = {
     RESTRICT_USERS: "restrictUsers"
 }
 
+const commands = {
+    TAKE_OUT: "TAKE_OUT",
+    VOTE_FOR: "VOTE_FOR",
+    VOTE_AGAINST: "VOTE_AGAINST",
+    STATUS: "STATUS",
+    CANCEL: "CANCEL",
+    START: "START",
+    STOP: "STOP",
+    SET_LANG: "SET_LANG",
+    SET_USER: "SET_USER"
+}
+
 class TitopiaBot {
-    constructor(repository, i18n){
-        this.i18n = i18n;
+    constructor(repository, messageService){
+        this.messageService = messageService;
         this.repository = repository;
         this.handlers = [];
         this.emitter = new EventEmitter();
@@ -28,6 +41,8 @@ class TitopiaBot {
             stopRegex: /\/stop/,
             langRegex: /^\/lang/
         }
+
+        this.commandKeys = [];
 
         this.init();
     }
@@ -41,14 +56,27 @@ class TitopiaBot {
     }
 
     init(){
-        this.addCommand((text, chat) => chat.isEnabled() && chat.getConfig().takeOutRegex.test(text), takeOutHandler);
-        this.addCommand((text, chat) => chat.isEnabled() && chat.getConfig().votePatterns.some(p=> text.indexOf(p)>=0), buildVoteHandler(true));
-        this.addCommand((text, chat) => chat.isEnabled() && chat.getConfig().unvotePatterns.some(p=> text.indexOf(p)>=0), buildVoteHandler(false));
-        this.addCommand((text, chat) => chat.isEnabled() && this.config.statusRegex.test(text), statusHandler);
-        this.addCommand((text, chat) => chat.isEnabled() && chat.getConfig().cancelRegex.test(text), cancelHandler);
-        this.addCommand((text)       => this.config.startRegex.test(text), startHandler);
-        this.addCommand((text, chat) => chat.isEnabled() && this.config.stopRegex.test(text), stopHandler);
-        this.addCommand((text, chat) => chat.isEnabled() && this.config.langRegex.test(text), setLangHandler);
+        this.commands = {
+            [commands.TAKE_OUT]: takeOutHandler,
+            [commands.VOTE_FOR]: buildVoteHandler(true),
+            [commands.VOTE_AGAINST]: buildVoteHandler(false),
+            [commands.STATUS]: statusHandler,
+            [commands.CANCEL]: cancelHandler,
+            [commands.START]: startHandler,
+            [commands.STOP]: stopHandler,
+            [commands.SET_LANG]: setLangHandler(this.messageService),
+            [commands.SET_USER]: setUserHandler
+        };
+
+        this.addCommand((text, chat) => chat.isEnabled() && chat.getConfig().takeOutRegex.test(text), commands.TAKE_OUT);
+        this.addCommand((text, chat) => chat.isEnabled() && chat.getConfig().votePatterns.some(p=> text.indexOf(p)>=0), commands.VOTE_FOR);
+        this.addCommand((text, chat) => chat.isEnabled() && chat.getConfig().unvotePatterns.some(p=> text.indexOf(p)>=0), commands.VOTE_AGAINST);
+        this.addCommand((text, chat) => chat.isEnabled() && this.config.statusRegex.test(text), commands.STATUS);
+        this.addCommand((text, chat) => chat.isEnabled() && chat.getConfig().cancelRegex.test(text), commands.CANCEL);
+        this.addCommand((text)       => this.config.startRegex.test(text), commands.START);
+        this.addCommand((text, chat) => chat.isEnabled() && this.config.stopRegex.test(text), commands.STOP);
+        this.addCommand((text, chat) => chat.isEnabled() && this.config.langRegex.test(text), commands.SET_LANG);
+        this.addCommand(() => true, commands.SET_USER);
     }
 
     sendSimpleMessageToChat(chatId, message) {
@@ -59,14 +87,23 @@ class TitopiaBot {
         this.emitter.emit(events.RESTRICT_USERS, chatId, users, untilTime);
     }
 
-    addCommand(match, handle){
-        this.handlers.push({
+    addCommand(match, commandKey){
+        this.commandKeys.push({
             match: match,
-            handle: handle
+            commandKey: commandKey
         });
     }
 
+    findCommandKey(text, chatRecord){
+        return this.commandKeys.filter(ck => ck.match(text, chatRecord));
+    }
+
     async handle(body) {
+
+        if(!body){
+            throw new Error("The body can't be empty");
+        }
+
         const {message} = body;
 
         if(!message){
@@ -80,30 +117,41 @@ class TitopiaBot {
         }
 
         const chatRecord = await this.repository.findChat(chat.id);
+        const cmds = this.findCommandKey(text, chatRecord);
 
-        this.i18n.setLocale(chatRecord.getConfig().lang);
-        const handler = this.handlers.find(t=>t.match(text, chatRecord));
-
-        let response;
-        if(handler){
-            const result = await handler.handle({
+        let responses = [];
+        
+        for(let cmd of cmds){
+            const command = this.commands[cmd.commandKey];
+    
+            if(!command){
+                console.log(`Command: ${cmd.commandKey} not found.`);
+                return;
+            }
+    
+            const result = await command({
                 body, 
                 text, 
                 chatRecord, 
-                from, 
-                i18n: this.i18n
+                from
             });
-
-            if(result){
+    
+            console.log(result);
+            if (result) {
                 if (result.takeOut) {
                     this.restrictUsers(chat.id, result.users, result.untilTime);
                 }
-                response = result.message;
+    
+                if(result.code){
+                    const lang = chatRecord.getConfig().lang;
+                    const message = this.messageService.getMessage(lang, result.code, result.metadata); 
+                    responses.push(message);
+                }
             }
         }
 
-        if (response){
-            this.sendSimpleMessageToChat(chat.id, response);
+        if (responses.length>0){
+            this.sendSimpleMessageToChat(chat.id, responses.join('\n'));
         }
     }
 }

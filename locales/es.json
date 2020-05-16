@@ -1,19 +1,19 @@
 {
 	"voting_not_started": "Votacion no iniciada.",
 	"user_required_to_voting": "Se necesita almenos un usuario para votar.",
-	"voting_status_title_users_%s": "Votacion para los usuarios: %s",
+	"vote_status {{users}} {{votes}} {{maxVoteToTakeOut}} totals {{totals}} {{maxVoteToFinish}}": "Votacion para los usuarios: {{users}}\nVotos: {{votes}} de {{maxVoteToTakeOut}}\nTotales: {{totals}} de {{maxVoteToFinish}}",
 	"vote_started_from_{{fromName}}_to_{{users}}_votes_{{votes}}_vote_using_{{votePattern}}_unvote_using_{{unvotePattern}}_totals_{{totals}}_cancel_using_{{cancelPattern}}": "Votacion iniciada {{users}} !\nPara mutar solo {{votes}} votos son necesarios, con {{totals}} votos la votacion terminara.\n---------------\nPara votar a favor: {{votePattern}}\nPara votar en contra:\n{{unvotePattern}}\n{{fromName}} si quieres cancelar utiliza: {{cancelPattern}}",
 	"voting_finished": "Votacion finalizadas.",
 	"voting_alredy_exists": "Ya hay una votacion en curso.",
-	"voting_status_body_votes_{{votes}}_{{maxVoteToTakeOut}}_totals_{{totals}}_{{maxVoteToFinish}}": "Votos: {{votes}} de {{maxVoteToTakeOut}}\nTotales: {{totals}} de {{maxVoteToFinish}}",
 	"you_cannot_cancel_the_current_vote": "No puedes cancelar la votacion actual.",
 	"vote_canceled": "Votacion cancelada.",
 	"users_{{users}}_muted_by_{{days}}": "Usuarios {{users}} muteados por {{days}} dias",
     "started": "**Titopia** iniciada!",
 	"stopped": "**Titopia** parada!",
-	"lang_required %s": "Necesitas especificar uno de estos lenguajes %s",
+	"lang_required {{langs}}": "Necesitas especificar uno de estos lenguajes {{langs}}",
 	"lang_not_found": "Lenguaje no encontrado",
 	"lang_changed": "Lenguaje cambiado",
 	"cant_close_in_current_take_out": "No puedes cerrar mientras intentan sacar a alguien.",
-	"%s nice_try_but_no":"%s buen intento pero nop."
+	"{{name}} nice_try_but_no":"{{name}} buen intento pero nop.",
+	"users {{usernames}} not_found": "Usuarios: {{usernames}} no encontrados."
 }
