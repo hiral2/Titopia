@@ -30,7 +30,7 @@ const commandKeys = {
 
 const defaultCommands = [
     { 
-        match: ({text, chatRecord}) => chatRecord.isEnabled() && chatRecord.getConfig().takeOutRegex.test(text),
+        match: ({text, chatRecord}) => chatRecord.getConfig().takeOutRegex.test(text),
         key: commandKeys.TAKE_OUT,
         handler: takeOutHandler,
     },

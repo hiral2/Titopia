@@ -134,7 +134,11 @@ const takeOutHandler = async ({
     chatRecord, 
     from
 }) => {
-    const { message: { entities, text } } = body;
+    if (!chatRecord.isEnabled()) {
+        await chatRecord.start();
+    }
+
+    const { message: { entities, reply_to_message, text } } = body;
 
     if(from.is_bot){
         return false;
@@ -144,10 +148,15 @@ const takeOutHandler = async ({
         return false;    
     }
 
-    const users = entities.filter(a=>a.type=='text_mention' && a.user).map(a=>a.user);
+    let extraUsers = [];
+    if (reply_to_message && reply_to_message.from) {
+        extraUsers.push(reply_to_message.from);
+    }
+    
+    const users = entities.filter(a=>a.type=='text_mention' && a.user).map(a=>a.user).concat(extraUsers);
     chatRecord.setUsers(users);
 
-    const username_mentions = entities.filter(a=>a.type=='mention').map(t=> text.substr(t.offset+1, t.length-1));
+    const username_mentions = entities.filter(a=>a.type=='mention').map(t=> text.substr(t.offset+1, t.length-1)).concat(extraUsers);
 
     if(username_mentions.length){
         const chatUsers = chatRecord.getUsers();
