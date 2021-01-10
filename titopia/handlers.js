@@ -130,7 +130,7 @@ const statusHandler = async ({
 }
 
 const takeOutHandler = async ({
-    body,
+    message,
     chatRecord, 
     from
 }) => {
@@ -138,7 +138,7 @@ const takeOutHandler = async ({
         await chatRecord.start();
     }
 
-    const { message: { entities, reply_to_message, text } } = body;
+    const { entities, reply_to_message, text } = message;
 
     if(from.is_bot){
         return false;

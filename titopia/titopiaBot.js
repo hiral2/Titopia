@@ -142,7 +142,7 @@ class TitopiaBot {
 
         const result = await command({
             chatRecord, 
-            body, 
+            message, 
             text, 
             from
         });
