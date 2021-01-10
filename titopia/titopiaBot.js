@@ -114,14 +114,14 @@ class TitopiaBot {
             return;
         }
 
-        const { message } = (body || {});
-        const { chat, text } = (message || {});
+        const { message } = body;
+        const { chat, text } = message;
         
         const chatRecord = await this.repository.findChat(chat.id);
         const cmds = this.findCommands({text, chatRecord});
 
-        let responses = cmds.map(cmd=> this.executeCommand(cmd, chatRecord, message))
-                            .filter(message);
+        let responses = await Promise.all(cmds.map(cmd=> this.executeCommand(cmd, chatRecord, message)));
+        responses = responses.filter(m => m);
         
         for (const resp of responses) {
             this.sendMessage(chat.id, resp);
@@ -161,12 +161,12 @@ class TitopiaBot {
     }
 
     isValidBody(body)  {
-        return body && body.message && this.isValidMessage(body.message) ? true : false;
+        return body && body.message && this.isValidMessage(body.message);
     }
 
     isValidMessage(message)  {
         const { chat, text, from } = message;
-        return text && chat && from ? true : false;
+        return text && chat && from;
     }
 }
 
