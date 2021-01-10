@@ -120,7 +120,7 @@ class TitopiaBot {
         const chatRecord = await this.repository.findChat(chat.id);
         const cmds = this.findCommands({text, chatRecord});
 
-        let responses = await Promise.all(cmds.map(cmd=> this.executeCommand(cmd, chatRecord, message)));
+        let responses = await Promise.all(cmds.map(cmd=> this.executeCommand(cmd.handler, chatRecord, message)));
         responses = responses.filter(m => m);
         
         for (const resp of responses) {
