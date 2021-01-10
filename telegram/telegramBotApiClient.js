@@ -13,7 +13,8 @@ class TelegramBotApiClient {
     sendMessage(chatId, text) {
         return axios.post(`${this.apiUrl}/bot${this.token}/sendMessage`,{
             chat_id: chatId,
-            text: text
+            text: text,
+            parse_mode: 'Markdown'
         })
     }
 
