@@ -35,12 +35,12 @@ const defaultCommands = [
         handler: takeOutHandler,
     },
     { 
-        match: ({text, chatRecord}) => chatRecord.isEnabled() && chatRecord.getConfig().votePatterns.some(p=> text.indexOf(p)>=0),
+        match: ({text, chatRecord }) => chatRecord.isEnabled() && chatRecord.getConfig().votePatterns.some(p=> text && text.indexOf(p)>=0),
         key: commandKeys.VOTE_FOR,
         handler: buildVoteHandler(true),
     },
     { 
-        match: ({text, chatRecord}) => chatRecord.isEnabled() && chatRecord.getConfig().unvotePatterns.some(p=> text.indexOf(p)>=0),
+        match: ({text, chatRecord }) => chatRecord.isEnabled() && chatRecord.getConfig().unvotePatterns.some(p=> text && text.indexOf(p)>=0),
         key: commandKeys.VOTE_AGAINST,
         handler: buildVoteHandler(false),
     },
@@ -115,10 +115,10 @@ class TitopiaBot {
         }
 
         const { message } = body;
-        const { chat, text } = message;
+        const { chat, text, sticker } = message;
         
         const chatRecord = await this.repository.findChat(chat.id);
-        const cmds = this.findCommands({text, chatRecord});
+        const cmds = this.findCommands({text: (text || (sticker && sticker.emoji? sticker.emoji : '')) , chatRecord});
 
         let responses = await Promise.all(cmds.map(cmd=> this.executeCommand(cmd.handler, chatRecord, message)));
         responses = responses.filter(m => m);
@@ -165,8 +165,8 @@ class TitopiaBot {
     }
 
     isValidMessage(message)  {
-        const { chat, text, from } = message;
-        return text && chat && from;
+        const { chat, text, from, sticker } = message;
+        return (text || (sticker && sticker.emoji)) && chat && from;
     }
 }
 
