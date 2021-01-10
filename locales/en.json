@@ -1,19 +1,19 @@
 {
 	"voting_not_started": "Voting not started.",
 	"user_required_to_voting": "User required to voting.",
-	"vote_status {{users}} {{votes}} {{maxVoteToTakeOut}} totals {{totals}} {{maxVoteToFinish}}": "On time voted for users: {{users}}\nVotes: {{votes}} of {{maxVoteToTakeOut}}\nTotals: {{totals}} of {{maxVoteToFinish}}",
-	"vote_started_from_{{fromName}}_to_{{users}}_votes_{{votes}}_vote_using_{{votePattern}}_unvote_using_{{unvotePattern}}_totals_{{totals}}_cancel_using_{{cancelPattern}}": "The vote started for users *{{users}}* !\nFor muted only {{votes}} voted is requred, with {{totals}} voted the votation is finished.\n--------------\nTo vote for: {{votePattern}}\nTo vote against: {{unvotePattern}}\n{{fromName}} to abort use *{{cancelPattern}}* command.",
+	"vote_status {{users}} {{votes}} {{maxVoteToTakeOut}} totals {{totals}} {{maxVoteToFinish}}": "On time voted for users: *{{users}}*\nVotes: *{{votes}}* of *{{maxVoteToTakeOut}}*\nTotals: *{{totals}}* of *{{maxVoteToFinish}}*",
+	"vote_started_from_{{fromName}}_to_{{users}}_votes_{{votes}}_vote_using_{{votePattern}}_unvote_using_{{unvotePattern}}_totals_{{totals}}_cancel_using_{{cancelPattern}}": "The vote started for users *{{users}}* !\nFor muted only *{{votes}}* voted is requred, with *{{totals}}* voted the votation is finished.\n--------------\nTo vote for: {{votePattern}}\nTo vote against: {{unvotePattern}}\n*{{fromName}}* to *abort* use *{{cancelPattern}}* command.",
 	"voting_finished": "Voting finished.",
 	"voting_alredy_exists": "Alredy exist a take out voting",
 	"you_cannot_cancel_the_current_vote": "You cannot cancel the current vote",
 	"vote_canceled": "Vote canceled.",
-	"users {{users}} muted_by {{days}}": "Users *{{users}}* muted by {{days}} days",
+	"users {{users}} muted_by {{days}}": "Users *{{users}}* muted by *{{days}}* days",
 	"started": "*Titopia* is started!",
 	"stopped": "*Titopia* is stopped",
-	"lang_required {{langs}}": "Lang is required, please use one of this lang: {{langs}}",
+	"lang_required {{langs}}": "Lang is required, please use one of this lang: *{{langs}}*",
 	"lang_not_found": "Lang not found",
 	"lang_changed": "Lang changed",
 	"cant_close_in_current_take_out": "You can't to close in current take out.",
-	"{{name}} nice_try_but_no":"{{name}} nice try but no.",
-	"users {{usernames}} not_found": "Users: {{usernames}} not found."
+	"{{name}} nice_try_but_no":"*{{name}}* nice try but no.",
+	"users {{usernames}} not_found": "Users: *{{usernames}}* not found."
 }
