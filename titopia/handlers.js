@@ -148,15 +148,15 @@ const takeOutHandler = async ({
         return false;    
     }
 
-    let extraUsers = [];
+    let replyUsers = [];
     if (reply_to_message && reply_to_message.from) {
-        extraUsers.push(reply_to_message.from);
+        replyUsers.push(reply_to_message.from);
     }
     
-    const users = entities.filter(a=>a.type=='text_mention' && a.user).map(a=>a.user).concat(extraUsers);
+    const users = entities.filter(a=>a.type=='text_mention' && a.user).map(a=>a.user).concat(replyUsers);
     chatRecord.setUsers(users);
 
-    const username_mentions = entities.filter(a=>a.type=='mention').map(t=> text.substr(t.offset+1, t.length-1)).concat(extraUsers);
+    const username_mentions = entities.filter(a=>a.type=='mention').map(t=> text.substr(t.offset+1, t.length-1)).concat(replyUsers.map(ru => ru.username));
 
     if(username_mentions.length){
         const chatUsers = chatRecord.getUsers();
