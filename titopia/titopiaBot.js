@@ -114,8 +114,9 @@ class TitopiaBot {
             return;
         }
 
-        const { message: { chat, text } } = body;
-
+        const { message } = (body || {});
+        const { chat, text } = (message || {});
+        
         const chatRecord = await this.repository.findChat(chat.id);
         const cmds = this.findCommands({text, chatRecord});
 
