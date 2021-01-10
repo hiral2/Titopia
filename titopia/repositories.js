@@ -15,7 +15,7 @@ const defaultChatConfig = {
     maxVoteToFinish: 10,
     bannedDays: 2,
     showStatusEveryVote: true,
-    votePatterns: [0x270B].map(e=> fixedFromCharCode(e)),
+    votePatterns: [0x270B,0x1F44B,0x1F44F,0x1F64C, 0x1F590, 0x1F91A, 0x1F44C, 0x1F44D].map(e=> fixedFromCharCode(e)),
     unvotePatterns: [0x1F44E].map(e=> fixedFromCharCode(e)),
     takeOutRegex: /\/out/,
     cancelRegex: /\/cancel/,
