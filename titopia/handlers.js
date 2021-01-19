@@ -238,7 +238,7 @@ const buildVoteHandler = (vote) => async ({
 
     const userNames = voteResult.users.map(u=>u.first_name).join(', ');
     if (voteResult.takeOut) {
-        const untilTime = moment().utc().add(config.bannedDays, 'days').valueOf()
+        const untilTime = moment().utc().add(config.bannedDays, 'days').unix();
         await chatRecord.clearCurrentTakeOut(untilTime);
         return {
             ...voteResult,
