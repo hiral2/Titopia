@@ -21,7 +21,7 @@
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "i18n": "^0.9.1",
-    "moment": "^2.25.1"
+    "moment": "^2.29.2"
   },
   "engines": {
     "node": "10.x"
